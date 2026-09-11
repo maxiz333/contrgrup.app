@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔍 Controllo Finale Sottogruppi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDEEE7; --surface:#FFFFFF; --ink:#1E2A30; --ink-soft:#5B6A70; --line:#DADBD2;
+    --accent:#F0631F; --accent-dark:#C94F16; --accent-soft:#FCE6D8;
+    --success:#2F7A4F; --success-soft:#E4F2E9; --danger:#C1442A; --danger-soft:#FBE7E2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.5;}
+  h1,h2{font-family:'Space Grotesk',system-ui,sans-serif;margin:0;}
+  .wrap{max-width:880px;margin:0 auto;padding:32px 20px 80px;}
+  .header{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+  .header .logo{font-size:34px;line-height:1;}
+  .header h1{font-size:21px;font-weight:700;}
+  .header p{margin:2px 0 0;color:var(--ink-soft);font-size:13.5px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:20px;}
+  .card h2{font-size:16px;font-weight:600;margin-bottom:4px;}
+  .card .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 16px;}
+  input[type=text],input[type=password]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;font-family:inherit;background:#FBFBF9;color:var(--ink);}
+  input:focus{outline:2px solid var(--accent);outline-offset:1px;background:#fff;}
+  .key-row{display:flex;gap:10px;}
+  .key-row input{flex:1;}
+  .icon-btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;cursor:pointer;font-size:14px;}
+  .btn{border:none;border-radius:9px;padding:10px 16px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;}
+  .btn-accent{background:var(--accent);color:#fff;}
+  .btn-accent:hover{background:var(--accent-dark);}
+  .btn-accent:disabled{background:#D9C9BF;cursor:not-allowed;}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink);}
+  .btn-ghost:hover{background:#F3F3EF;}
+  .btn-block{width:100%;padding:13px;font-size:15px;}
+  .dropzone{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;font-size:13.5px;color:var(--ink-soft);cursor:pointer;}
+  .dropzone.drag{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
+  .dropzone input{display:none;}
+  .dz-count{font-weight:600;color:var(--ink);margin-top:4px;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:600px){.cols{grid-template-columns:1fr;}}
+  .note{font-size:12.5px;color:var(--ink-soft);margin-top:8px;}
+  table.match{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:14px;}
+  table.match th{text-align:left;font-size:12px;color:var(--ink-soft);border-bottom:1px solid var(--line);padding:6px 8px;}
+  table.match td{padding:6px 8px;border-bottom:1px solid #EFEFE9;}
+  .ok-pill{color:var(--success);font-weight:600;}
+  .warn-pill{color:var(--danger);font-weight:600;}
+  .progress-list{display:flex;flex-direction:column;gap:6px;margin-top:14px;max-height:260px;overflow-y:auto;}
+  .progress-item{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 10px;border-radius:8px;background:#FBFBF9;border:1px solid var(--line);flex-wrap:wrap;}
+  .progress-item .g{font-weight:600;min-width:90px;}
+  .progress-item .f{flex:1;}
+  .banner{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);border:1px solid #F0C9AC;color:var(--accent-dark);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:16px;}
+  .report-item{border-top:1px solid var(--line);padding:10px 0;font-size:13.5px;}
+  .report-item.ok{color:var(--success);}
+  .report-item.warn .detail{color:var(--danger);font-size:12.5px;margin-top:4px;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">🔍</div>
+    <div>
+      <h1>Controllo Finale Sottogruppi</h1>
+      <p>Carica tutte le foto e tutti i file scaricati: li abbino da solo e li controllo tutti insieme</p>
+    </div>
+  </div>
+
+  <div class="banner">
+    ⚠️ <div>Strumento separato dall'app di estrazione. Non modifica i tuoi file .xls — ti dice solo dove le foto e i dati non combaciano, così controlli tu quei punti a mano.</div>
+  </div>
+
+  <div class="card">
+    <h2>🔑 Chiavi API Gemini</h2>
+    <p class="sub">Una per riga se ne hai più di una — quando la prima finisce la quota gratuita, passo automaticamente alla successiva</p>
+    <textarea id="apiKeys" placeholder="Incolla qui una o più chiavi, una per riga..." rows="3" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;font-family:inherit;background:#FBFBF9;color:var(--ink);resize:vertical;"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>📤 Carica tutto</h2>
+    <p class="sub">Le foto vanno bene mischiate, senza bisogno di rinominarle: se il nome contiene già una "g" e un numero (es. f1<b>g3</b>) lo uso come scorciatoia veloce, altrimenti le riconosco leggendo il contenuto con l'AI. I file .xls devono avere il numero del gruppo all'inizio del nome.</p>
+    <div class="cols">
+      <div>
+        <div class="dropzone" id="dzFoto">
+          📷 Trascina qui TUTTE le foto<br>o clicca per scegliere
+          <div class="dz-count" id="countFoto">0 foto caricate</div>
+          <input type="file" id="inputFoto" accept="image/*" multiple>
+        </div>
+      </div>
+      <div>
+        <div class="dropzone" id="dzXls">
+          📄 Trascina qui TUTTI i file .xls<br>o clicca per scegliere
+          <div class="dz-count" id="countXls">0 file caricati</div>
+          <input type="file" id="inputXls" accept=".xls,.xlsx" multiple>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-block" id="riconosciBtn" type="button" style="margin-top:14px;">🧠 Riconosci le foto rimanenti leggendo il contenuto (0)</button>
+    <div class="progress-list hidden" id="progressRiconoscimento"></div>
+    <div id="irrisolteReport"></div>
+    <button class="btn btn-accent btn-block" id="abbinaBtn" type="button" style="margin-top:16px;">🔗 Abbina foto e file</button>
+    <div id="matchReport"></div>
+  </div>
+
+  <div class="card hidden" id="verificaCard">
+    <h2>🚀 Controllo automatico</h2>
+    <p class="sub">Confronta ogni gruppo abbinato con le sue foto originali, uno via l'altro, senza bisogno di seguirlo passo passo</p>
+    <p class="note" style="margin:-4px 0 14px;">📱 Tieni la pagina aperta finché non vedi "Fatto!". Se esci a metà, torna e premi di nuovo: riprende solo dai gruppi mancanti.</p>
+    <button class="btn btn-accent btn-block" id="avviaBtn" type="button">▶️ Avvia controllo su tutti i gruppi abbinati</button>
+    <div class="progress-list hidden" id="progressList"></div>
+  </div>
+
+  <div class="card hidden" id="reportCard">
+    <h2>📋 Report finale</h2>
+    <p class="sub" id="reportSummary"></p>
+    <div id="reportBody"></div>
+    <button class="btn btn-ghost btn-block" id="scaricaReportBtn" type="button" style="margin-top:14px;">📥 Scarica report come testo</button>
+  </div>
+
+</div>
+
+<script>
+// ---------- STATO ----------
+let fotoPerGruppo = {};   // numero -> [{filename, mime, dataUrl}]
+let fileXlsPerGruppo = {}; // numero -> {nomeGruppo, righe:[{codice,descrizione}], nomeFile}
+let gruppiAbbinati = [];   // [numero,...] presenti sia in foto che in xls
+let statoVerifica = {};    // numero -> {stato:'pending'|'done'|'error', problemi:[...], errore:null}
+
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+// ---------- CHIAVI API (una o più, con passaggio automatico) ----------
+let apiKeys = [];
+let chiaveAttiva = 0;
+
+function leggiChiavi(){
+  apiKeys = document.getElementById('apiKeys').value.split('\n').map(s => s.trim()).filter(Boolean);
+  return apiKeys;
+}
+
+// ---------- RIDIMENSIONAMENTO FOTO ----------
+function resizeImage(file, maxDim = 1600, quality = 0.85){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim){
+          if (width > height){ height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('Immagine non leggibile'));
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function estraiNumeroDaNomeFoto(filename){
+  const m = filename.match(/g\s*0*(\d+)/i);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+// ---------- DROPZONE FOTO ----------
+const dzFoto = document.getElementById('dzFoto');
+const inputFoto = document.getElementById('inputFoto');
+dzFoto.addEventListener('click', () => inputFoto.click());
+inputFoto.addEventListener('change', e => gestisciFoto(e.target.files));
+['dragenter','dragover'].forEach(evt => dzFoto.addEventListener(evt, e => { e.preventDefault(); dzFoto.classList.add('drag'); }));
+['dragleave','drop'].forEach(evt => dzFoto.addEventListener(evt, e => { e.preventDefault(); dzFoto.classList.remove('drag'); }));
+dzFoto.addEventListener('drop', e => gestisciFoto(e.dataTransfer.files));
+
+let totaleFotoCaricate = 0;
+let fotoDaClassificare = []; // [{id, filename, mime, dataUrl}] - foto senza "gN" riconoscibile nel nome
+
+function aggiornaContatoreFoto(){
+  const numeriGruppo = Object.keys(fotoPerGruppo).length;
+  document.getElementById('countFoto').textContent =
+    `${totaleFotoCaricate} foto caricate (${numeriGruppo} gruppi riconosciuti dal nome, ${fotoDaClassificare.length} da riconoscere con l'AI)`;
+  const rb = document.getElementById('riconosciBtn');
+  rb.textContent = `🧠 Riconosci le foto rimanenti leggendo il contenuto (${fotoDaClassificare.length})`;
+  rb.disabled = fotoDaClassificare.length === 0;
+}
+
+async function gestisciFoto(fileList){
+  const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  for (const file of files){
+    const numero = estraiNumeroDaNomeFoto(file.name);
+    let dataUrl;
+    try { dataUrl = await resizeImage(file); } catch(e) { continue; }
+    totaleFotoCaricate++;
+    if (numero === null){
+      fotoDaClassificare.push({ id: uid(), filename: file.name, mime: 'image/jpeg', dataUrl });
+    } else {
+      if (!fotoPerGruppo[numero]) fotoPerGruppo[numero] = [];
+      fotoPerGruppo[numero].push({ id: uid(), filename: file.name, mime: 'image/jpeg', dataUrl });
+    }
+  }
+  aggiornaContatoreFoto();
+}
+
+// ---------- DROPZONE XLS ----------
+const dzXls = document.getElementById('dzXls');
+const inputXls = document.getElementById('inputXls');
+dzXls.addEventListener('click', () => inputXls.click());
+inputXls.addEventListener('change', e => gestisciXls(e.target.files));
+['dragenter','dragover'].forEach(evt => dzXls.addEventListener(evt, e => { e.preventDefault(); dzXls.classList.add('drag'); }));
+['dragleave','drop'].forEach(evt => dzXls.addEventListener(evt, e => { e.preventDefault(); dzXls.classList.remove('drag'); }));
+dzXls.addEventListener('drop', e => gestisciXls(e.dataTransfer.files));
+
+function leggiTestoFile(file){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsText(file);
+  });
+}
+
+function estraiDatiDaXls(testo, filename){
+  const mSheet = testo.match(/<Worksheet ss:Name="([^"]+)">/);
+  if (!mSheet) return null;
+  const nomeGruppo = mSheet[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+  const mNum = filename.match(/^0*(\d+)/) || nomeGruppo.match(/^0*(\d+)/);
+  if (!mNum) return null;
+  const numero = parseInt(mNum[1], 10);
+
+  const rowsXmlMatch = testo.match(/<Worksheet ss:Name="[^"]+">([\s\S]*?)<\/Worksheet>/);
+  const righe = [];
+  if (rowsXmlMatch){
+    const rows = [...rowsXmlMatch[1].matchAll(/<Row>([\s\S]*?)<\/Row>/g)];
+    rows.forEach(r => {
+      const cells = [...r[1].matchAll(/<Data ss:Type="String">([\s\S]*?)<\/Data>/g)].map(c =>
+        c[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')
+      );
+      if (cells.length >= 2 && cells[0] !== 'Codice'){
+        righe.push({ codice: cells[0], descrizione: cells[1] });
+      }
+    });
+  }
+  return { numero, nomeGruppo, righe, nomeFile: filename };
+}
+
+async function gestisciXls(fileList){
+  const files = Array.from(fileList).filter(f => /\.xlsx?$/i.test(f.name));
+  for (const file of files){
+    const testo = await leggiTestoFile(file);
+    const dati = estraiDatiDaXls(testo, file.name);
+    if (dati) fileXlsPerGruppo[dati.numero] = dati;
+  }
+  document.getElementById('countXls').textContent = `${Object.keys(fileXlsPerGruppo).length} gruppi caricati`;
+}
+
+// ---------- RICONOSCIMENTO AUTOMATICO DELLE FOTO SENZA NOME UTILE ----------
+const PROMPT_ESTRAZIONE = `Sei un sistema di estrazione dati per un gestionale magazzino.
+Analizza questa foto di una tabella "SOTTOGRUPPI MERCEOLOGICI".
+La tabella ha due colonne:
+- Codice: numero di 2-3 cifre (mantieni gli zeri iniziali se presenti)
+- Descrizione: testo in MAIUSCOLO che descrive il sottogruppo
+Estrai TUTTE le righe visibili nella foto.
+Restituisci SOLO un oggetto JSON nel formato:
+{"sottogruppi": [{"codice": "02", "descrizione": "CHIUSURE USO CASA"}]}
+Niente altro testo, solo il JSON.`;
+
+async function estraiRigheFoto(foto, onRetry){
+  const parti = [{ text: PROMPT_ESTRAZIONE }, { inline_data: { mime_type: foto.mime, data: foto.dataUrl.split(',')[1] } }];
+  const parsed = await chiamaGeminiParti(apiKey, parti, 1, onRetry);
+  return parsed.sottogruppi || [];
+}
+
+function normalizza(s){ return String(s || '').trim().toUpperCase().replace(/\s+/g, ' '); }
+
+function trovaGruppoMigliore(righeFoto){
+  let migliore = null, miglioreScore = 0, secondoScore = 0;
+  Object.entries(fileXlsPerGruppo).forEach(([numeroStr, dati]) => {
+    const setGruppo = new Set(dati.righe.map(r => normalizza(r.codice) + '|' + normalizza(r.descrizione)));
+    let score = 0;
+    righeFoto.forEach(r => {
+      if (setGruppo.has(normalizza(r.codice) + '|' + normalizza(r.descrizione))) score++;
+    });
+    if (score > miglioreScore){ secondoScore = miglioreScore; miglioreScore = score; migliore = parseInt(numeroStr, 10); }
+    else if (score > secondoScore){ secondoScore = score; }
+  });
+  // Richiedo almeno 2 righe corrispondenti e un margine netto sul secondo gruppo più simile,
+  // per evitare abbinamenti sbagliati basati su una coincidenza isolata
+  if (migliore !== null && miglioreScore >= 2 && miglioreScore > secondoScore) return migliore;
+  return null;
+}
+
+document.getElementById('riconosciBtn').addEventListener('click', async () => {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey){ alert('Inserisci prima la chiave API Gemini 🔑'); return; }
+  if (!Object.keys(fileXlsPerGruppo).length){ alert('Carica prima almeno un file .xls: mi serve per sapere a quale gruppo può appartenere ogni foto.'); return; }
+  if (!fotoDaClassificare.length){ return; }
+
+  const btn = document.getElementById('riconosciBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Riconoscimento in corso...';
+  const progHost = document.getElementById('progressRiconoscimento');
+  progHost.innerHTML = '';
+  progHost.classList.remove('hidden');
+
+  const daClassificare = fotoDaClassificare.slice();
+  const CONCORRENZA = 2;
+
+  async function classificaUna(foto){
+    const item = document.createElement('div');
+    item.className = 'progress-item';
+    item.innerHTML = `<span class="f">${escapeHtml(foto.filename)}</span><span class="s">⏳</span>`;
+    progHost.appendChild(item);
+    progHost.scrollTop = progHost.scrollHeight;
+    const statusEl = item.querySelector('.s');
+    try {
+      const righe = await estraiRigheFoto(apiKey, foto, (attempt, status) => {
+        statusEl.textContent = status === 404 ? '🔁 modello aggiornato...' : `🔄 ritento (${attempt}/4)...`;
+      });
+      const numero = trovaGruppoMigliore(righe);
+      if (numero !== null){
+        if (!fotoPerGruppo[numero]) fotoPerGruppo[numero] = [];
+        fotoPerGruppo[numero].push(foto);
+        fotoDaClassificare = fotoDaClassificare.filter(f => f.id !== foto.id);
+        statusEl.textContent = `✅ assegnata al gruppo ${numero}`;
+      } else {
+        statusEl.textContent = '⚠️ nessun gruppo riconosciuto con sicurezza — assegnala a mano sotto';
+      }
+    } catch (e) {
+      statusEl.textContent = '❌ ' + e.message;
+    }
+  }
+
+  for (let i = 0; i < daClassificare.length; i += CONCORRENZA){
+    const lotto = daClassificare.slice(i, i + CONCORRENZA);
+    await Promise.all(lotto.map(classificaUna));
+  }
+
+  aggiornaContatoreFoto();
+  btn.disabled = fotoDaClassificare.length === 0;
+  btn.textContent = `🧠 Riconosci le foto rimanenti leggendo il contenuto (${fotoDaClassificare.length})`;
+  mostraFotoIrrisolte();
+});
+
+function mostraFotoIrrisolte(){
+  const host = document.getElementById('irrisolteReport');
+  if (!fotoDaClassificare.length){ host.innerHTML = ''; return; }
+  const numeri = Object.keys(fileXlsPerGruppo).map(Number).sort((a,b) => a-b);
+  const opzioni = numeri.map(n => `<option value="${n}">${n} — ${escapeHtml(fileXlsPerGruppo[n].nomeGruppo)}</option>`).join('');
+  let html = `<div class="banner" style="flex-direction:column;align-items:stretch;"><strong>⚠️ ${fotoDaClassificare.length} foto non riconosciute con sicurezza — assegnale a mano se vuoi includerle nel controllo:</strong>`;
+  fotoDaClassificare.forEach(foto => {
+    html += `<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid #F0C9AC;font-size:13px;flex-wrap:wrap;">
+      <span style="flex:1;min-width:120px;">${escapeHtml(foto.filename)}</span>
+      <select data-foto-id="${foto.id}" class="assegna-select"><option value="">-- scegli gruppo --</option>${opzioni}</select>
+      <button class="btn btn-ghost assegna-btn" data-foto-id="${foto.id}" type="button">Assegna</button>
+    </div>`;
+  });
+  html += '</div>';
+  host.innerHTML = html;
+  host.querySelectorAll('.assegna-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const fotoId = b.dataset.fotoId;
+      const sel = host.querySelector(`select[data-foto-id="${fotoId}"]`);
+      const numero = sel.value === '' ? null : parseInt(sel.value, 10);
+      if (numero === null){ alert('Scegli un gruppo dal menu prima di assegnare.'); return; }
+      const foto = fotoDaClassificare.find(f => f.id === fotoId);
+      if (!foto) return;
+      if (!fotoPerGruppo[numero]) fotoPerGruppo[numero] = [];
+      fotoPerGruppo[numero].push(foto);
+      fotoDaClassificare = fotoDaClassificare.filter(f => f.id !== fotoId);
+      aggiornaContatoreFoto();
+      mostraFotoIrrisolte();
+    });
+  });
+}
+
+// ---------- ABBINAMENTO ----------
+document.getElementById('abbinaBtn').addEventListener('click', () => {
+  const numeriFoto = new Set(Object.keys(fotoPerGruppo).map(Number));
+  const numeriXls = new Set(Object.keys(fileXlsPerGruppo).map(Number));
+  const tuttiNumeri = [...new Set([...numeriFoto, ...numeriXls])].sort((a,b) => a-b);
+
+  gruppiAbbinati = tuttiNumeri.filter(n => numeriFoto.has(n) && numeriXls.has(n));
+  statoVerifica = {};
+  gruppiAbbinati.forEach(n => { statoVerifica[n] = { stato: 'pending', problemi: null, errore: null }; });
+
+  const host = document.getElementById('matchReport');
+  let html = '<table class="match"><thead><tr><th>Gruppo</th><th>Nome</th><th>Foto</th><th>File</th><th>Stato</th></tr></thead><tbody>';
+  tuttiNumeri.forEach(n => {
+    const foto = fotoPerGruppo[n] ? fotoPerGruppo[n].length : 0;
+    const xls = fileXlsPerGruppo[n];
+    const ok = foto > 0 && xls;
+    html += `<tr>
+      <td>${n}</td>
+      <td>${xls ? escapeHtml(xls.nomeGruppo) : '—'}</td>
+      <td>${foto || '—'}</td>
+      <td>${xls ? xls.righe.length + ' righe' : '—'}</td>
+      <td>${ok ? '<span class="ok-pill">✅ abbinato</span>' : '<span class="warn-pill">⚠️ incompleto</span>'}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  if (!gruppiAbbinati.length){
+    html += '<p class="note">Nessun gruppo abbinato — controlla che i nomi delle foto contengano "gN" e che i file .xls inizino col numero del gruppo.</p>';
+  } else {
+    html += `<p class="note">${gruppiAbbinati.length} gruppi pronti per il controllo.</p>`;
+  }
+  host.innerHTML = html;
+
+  document.getElementById('verificaCard').classList.toggle('hidden', gruppiAbbinati.length === 0);
+});
+
+// ---------- CHIAMATA GEMINI (stessa logica collaudata dell'app principale) ----------
+const MODELLI_CANDIDATI = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+let modelloAttivo = 0;
+
+async function chiamaGeminiParti(parts, attempt = 1, onRetry = null, modelIdx = modelloAttivo, chiaveIdx = chiaveAttiva){
+  const apiKey = apiKeys[chiaveIdx];
+  const modello = MODELLI_CANDIDATI[modelIdx];
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modello}:generateContent?key=${apiKey}`;
+  const payload = {
+    contents: [{ parts }],
+    generationConfig: { temperature: 0.1, maxOutputTokens: 8192, responseMimeType: 'application/json' }
+  };
+  let res;
+  try {
+    res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  } catch (e) {
+    throw new Error('Errore di rete: ' + e.message);
+  }
+  if (res.status === 429 || res.status === 503){
+    const bodyText = await res.text().catch(() => '');
+    if (/plan and billing/i.test(bodyText)){
+      if (chiaveIdx < apiKeys.length - 1){
+        chiaveAttiva = chiaveIdx + 1;
+        if (onRetry) onRetry(attempt, 'chiave');
+        return chiamaGeminiParti(parts, 1, onRetry, modelIdx, chiaveAttiva);
+      }
+      throw new Error(`Limite gratuito raggiunto su tutte le ${apiKeys.length} chiavi disponibili — aspetta un minuto (o fino a domani), oppure aggiungine altre.`);
+    }
+    if (attempt <= 4){
+      if (onRetry) onRetry(attempt, res.status);
+      await new Promise(r => setTimeout(r, attempt * 8000));
+      return chiamaGeminiParti(parts, attempt + 1, onRetry, modelIdx, chiaveIdx);
+    }
+    throw new Error(`Errore HTTP ${res.status}: ${bodyText.slice(0,150)}`);
+  }
+  if (res.status === 404 && modelIdx < MODELLI_CANDIDATI.length - 1){
+    modelloAttivo = modelIdx + 1;
+    if (onRetry) onRetry(attempt, 404);
+    return chiamaGeminiParti(parts, 1, onRetry, modelloAttivo, chiaveIdx);
+  }
+  if (res.status === 400 || res.status === 403){
+    if (chiaveIdx < apiKeys.length - 1){
+      chiaveAttiva = chiaveIdx + 1;
+      if (onRetry) onRetry(attempt, 'chiave');
+      return chiamaGeminiParti(parts, 1, onRetry, modelIdx, chiaveAttiva);
+    }
+    throw new Error('Chiave API non valida — controllala su aistudio.google.com/app/apikey');
+  }
+  if (!res.ok){
+    const body = await res.text().catch(() => '');
+    throw new Error(`Errore HTTP ${res.status}: ${body.slice(0,150)}`);
+  }
+  const data = await res.json();
+  let text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+  text = text.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+  return JSON.parse(text);
+}
+
+const VERIFICA_PROMPT = `Hai il compito di controllare la qualità di un'estrazione dati già fatta.
+Ti fornisco: (1) una o più foto di una tabella "SOTTOGRUPPI MERCEOLOGICI" con colonne Codice e Descrizione,
+e (2) l'elenco di righe già estratto automaticamente da quelle foto.
+Confronta con attenzione l'elenco con quello che vedi scritto nelle foto e segnala SOLO le differenze di cui sei ASSOLUTAMENTE certo guardando la foto.
+Sii prudente: nel dubbio, NON segnalare nulla. È meglio non segnalare una differenza incerta piuttosto che proporre una correzione sbagliata.
+Presta particolare attenzione a non confondere la spaziatura tra le parole se non è chiarissima nella foto: nel dubbio, non segnalarlo come errore.
+Non segnalare nulla se l'elenco corrisponde a quanto scritto nelle foto.
+Rispondi SOLO con questo JSON, nient'altro (array vuoto se non trovi problemi):
+{"problemi": [
+  {"tipo": "errato", "codice_elenco": "02", "descrizione_elenco": "testo attuale sbagliato", "codice_corretto": "02", "descrizione_corretta": "testo corretto letto dalla foto"},
+  {"tipo": "mancante", "codice_corretto": "07", "descrizione_corretta": "riga visibile nella foto ma assente dall'elenco"},
+  {"tipo": "in_piu", "codice_elenco": "09", "descrizione_elenco": "riga nell'elenco che non trovi in nessuna foto"}
+]}`;
+
+async function verificaGruppo(apiKey, numero, onRetry){
+  const xls = fileXlsPerGruppo[numero];
+  const foto = fotoPerGruppo[numero];
+  const elenco = xls.righe.map(r => `${r.codice} — ${r.descrizione}`).join('\n') || '(elenco vuoto)';
+  const parti = [{ text: VERIFICA_PROMPT + '\n\nElenco attuale da controllare:\n' + elenco }];
+  foto.forEach(p => parti.push({ inline_data: { mime_type: p.mime, data: p.dataUrl.split(',')[1] } }));
+  const parsed = await chiamaGeminiParti(apiKey, parti, 1, onRetry);
+  return parsed.problemi || [];
+}
+
+// ---------- AVVIO CONTROLLO ----------
+function addProgressItem(nomeGruppo){
+  const list = document.getElementById('progressList');
+  list.classList.remove('hidden');
+  const item = document.createElement('div');
+  item.className = 'progress-item';
+  item.innerHTML = `<span class="g">${escapeHtml(nomeGruppo)}</span><span class="f" id="stato-${uid()}">⏳ in coda</span>`;
+  list.appendChild(item);
+  list.scrollTop = list.scrollHeight;
+  return item.querySelector('.f');
+}
+
+document.getElementById('avviaBtn').addEventListener('click', async () => {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey){ alert('Inserisci prima la chiave API Gemini 🔑'); return; }
+  if (!gruppiAbbinati.length){ alert('Nessun gruppo abbinato — premi prima "Abbina foto e file".'); return; }
+
+  const btn = document.getElementById('avviaBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Controllo in corso...';
+  document.getElementById('progressList').innerHTML = '';
+
+  const CONCORRENZA = 2;
+  const daFare = gruppiAbbinati.filter(n => statoVerifica[n].stato !== 'done');
+
+  async function processaGruppo(numero){
+    const xls = fileXlsPerGruppo[numero];
+    const statusEl = addProgressItem(xls.nomeGruppo);
+    try {
+      const problemi = await verificaGruppo(apiKey, numero, (attempt, status) => {
+        statusEl.textContent = status === 404 ? '🔁 modello aggiornato, ritento...' : `🔄 server occupato, ritento (${attempt}/4)...`;
+      });
+      statoVerifica[numero] = { stato: 'done', problemi, errore: null };
+      statusEl.textContent = problemi.length ? `⚠️ ${problemi.length} differenza/e trovate` : '✅ tutto ok';
+    } catch (e) {
+      statoVerifica[numero] = { stato: 'error', problemi: null, errore: e.message };
+      statusEl.textContent = '❌ ' + e.message;
+    }
+  }
+
+  for (let i = 0; i < daFare.length; i += CONCORRENZA){
+    const lotto = daFare.slice(i, i + CONCORRENZA);
+    await Promise.all(lotto.map(n => processaGruppo(n)));
+  }
+
+  btn.disabled = false;
+  btn.textContent = '▶️ Avvia controllo su tutti i gruppi abbinati';
+  mostraReportFinale();
+});
+
+// ---------- REPORT FINALE ----------
+function mostraReportFinale(){
+  const card = document.getElementById('reportCard');
+  card.classList.remove('hidden');
+
+  const fatti = gruppiAbbinati.filter(n => statoVerifica[n].stato === 'done');
+  const conProblemi = fatti.filter(n => statoVerifica[n].problemi && statoVerifica[n].problemi.length);
+  const puliti = fatti.filter(n => statoVerifica[n].problemi && !statoVerifica[n].problemi.length);
+  const falliti = gruppiAbbinati.filter(n => statoVerifica[n].stato === 'error');
+
+  document.getElementById('reportSummary').textContent =
+    `${fatti.length}/${gruppiAbbinati.length} gruppi controllati · ${puliti.length} senza differenze · ${conProblemi.length} da rivedere · ${falliti.length} non elaborati`;
+
+  let html = '';
+  conProblemi.forEach(n => {
+    const xls = fileXlsPerGruppo[n];
+    html += `<div class="report-item warn"><b>⚠️ Gruppo ${n} — ${escapeHtml(xls.nomeGruppo)}</b>`;
+    statoVerifica[n].problemi.forEach(p => {
+      let desc = '';
+      if (p.tipo === 'errato') desc = `Riga "${escapeHtml(p.codice_elenco)} — ${escapeHtml(p.descrizione_elenco)}" dovrebbe essere "${escapeHtml(p.codice_corretto)} — ${escapeHtml(p.descrizione_corretta)}"`;
+      else if (p.tipo === 'mancante') desc = `Manca la riga "${escapeHtml(p.codice_corretto)} — ${escapeHtml(p.descrizione_corretta)}"`;
+      else if (p.tipo === 'in_piu') desc = `Riga di troppo: "${escapeHtml(p.codice_elenco)} — ${escapeHtml(p.descrizione_elenco)}"`;
+      html += `<div class="detail">${desc}</div>`;
+    });
+    html += `</div>`;
+  });
+  falliti.forEach(n => {
+    const xls = fileXlsPerGruppo[n];
+    html += `<div class="report-item warn"><b>❌ Gruppo ${n} — ${escapeHtml(xls.nomeGruppo)}</b><div class="detail">${escapeHtml(statoVerifica[n].errore)}</div></div>`;
+  });
+  puliti.forEach(n => {
+    const xls = fileXlsPerGruppo[n];
+    html += `<div class="report-item ok">✅ Gruppo ${n} — ${escapeHtml(xls.nomeGruppo)}: nessuna differenza</div>`;
+  });
+  document.getElementById('reportBody').innerHTML = html || '<p class="note">Nessun gruppo ancora controllato.</p>';
+}
+
+document.getElementById('scaricaReportBtn').addEventListener('click', () => {
+  let testo = `REPORT CONTROLLO FINALE SOTTOGRUPPI — ${new Date().toLocaleString('it-IT')}\n${'='.repeat(60)}\n\n`;
+  gruppiAbbinati.forEach(n => {
+    const xls = fileXlsPerGruppo[n];
+    const s = statoVerifica[n];
+    testo += `Gruppo ${n} — ${xls.nomeGruppo}\n`;
+    if (s.stato === 'error'){
+      testo += `  ERRORE: ${s.errore}\n`;
+    } else if (!s.problemi || !s.problemi.length){
+      testo += `  OK — nessuna differenza trovata\n`;
+    } else {
+      s.problemi.forEach(p => {
+        if (p.tipo === 'errato') testo += `  ERRATO: "${p.codice_elenco} — ${p.descrizione_elenco}" -> dovrebbe essere "${p.codice_corretto} — ${p.descrizione_corretta}"\n`;
+        else if (p.tipo === 'mancante') testo += `  MANCANTE: "${p.codice_corretto} — ${p.descrizione_corretta}"\n`;
+        else if (p.tipo === 'in_piu') testo += `  IN PIU': "${p.codice_elenco} — ${p.descrizione_elenco}"\n`;
+      });
+    }
+    testo += '\n';
+  });
+  const blob = new Blob([testo], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `report_controllo_${new Date().toISOString().slice(0,10)}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
