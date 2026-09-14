@@ -274,7 +274,7 @@ Niente altro testo, solo il JSON.`;
 
 async function estraiRigheFoto(foto, onRetry){
   const parti = [{ text: PROMPT_ESTRAZIONE }, { inline_data: { mime_type: foto.mime, data: foto.dataUrl.split(',')[1] } }];
-  const parsed = await chiamaGeminiParti(apiKey, parti, 1, onRetry);
+  const parsed = await chiamaGeminiParti(parti, 1, onRetry);
   return parsed.sottogruppi || [];
 }
 
@@ -298,8 +298,8 @@ function trovaGruppoMigliore(righeFoto){
 }
 
 document.getElementById('riconosciBtn').addEventListener('click', async () => {
-  const apiKey = document.getElementById('apiKey').value.trim();
-  if (!apiKey){ alert('Inserisci prima la chiave API Gemini 🔑'); return; }
+  leggiChiavi();
+  if (!apiKeys.length){ alert('Inserisci almeno una chiave API Gemini 🔑'); return; }
   if (!Object.keys(fileXlsPerGruppo).length){ alert('Carica prima almeno un file .xls: mi serve per sapere a quale gruppo può appartenere ogni foto.'); return; }
   if (!fotoDaClassificare.length){ return; }
 
@@ -321,8 +321,8 @@ document.getElementById('riconosciBtn').addEventListener('click', async () => {
     progHost.scrollTop = progHost.scrollHeight;
     const statusEl = item.querySelector('.s');
     try {
-      const righe = await estraiRigheFoto(apiKey, foto, (attempt, status) => {
-        statusEl.textContent = status === 404 ? '🔁 modello aggiornato...' : `🔄 ritento (${attempt}/4)...`;
+      const righe = await estraiRigheFoto(foto, (attempt, status) => {
+        statusEl.textContent = status === 404 ? '🔁 modello aggiornato...' : status === 'chiave' ? '🔑 chiave esaurita, passo alla successiva...' : `🔄 ritento (${attempt}/4)...`;
       });
       const numero = trovaGruppoMigliore(righe);
       if (numero !== null){
@@ -488,13 +488,13 @@ Rispondi SOLO con questo JSON, nient'altro (array vuoto se non trovi problemi):
   {"tipo": "in_piu", "codice_elenco": "09", "descrizione_elenco": "riga nell'elenco che non trovi in nessuna foto"}
 ]}`;
 
-async function verificaGruppo(apiKey, numero, onRetry){
+async function verificaGruppo(numero, onRetry){
   const xls = fileXlsPerGruppo[numero];
   const foto = fotoPerGruppo[numero];
   const elenco = xls.righe.map(r => `${r.codice} — ${r.descrizione}`).join('\n') || '(elenco vuoto)';
   const parti = [{ text: VERIFICA_PROMPT + '\n\nElenco attuale da controllare:\n' + elenco }];
   foto.forEach(p => parti.push({ inline_data: { mime_type: p.mime, data: p.dataUrl.split(',')[1] } }));
-  const parsed = await chiamaGeminiParti(apiKey, parti, 1, onRetry);
+  const parsed = await chiamaGeminiParti(parti, 1, onRetry);
   return parsed.problemi || [];
 }
 
@@ -511,8 +511,8 @@ function addProgressItem(nomeGruppo){
 }
 
 document.getElementById('avviaBtn').addEventListener('click', async () => {
-  const apiKey = document.getElementById('apiKey').value.trim();
-  if (!apiKey){ alert('Inserisci prima la chiave API Gemini 🔑'); return; }
+  leggiChiavi();
+  if (!apiKeys.length){ alert('Inserisci almeno una chiave API Gemini 🔑'); return; }
   if (!gruppiAbbinati.length){ alert('Nessun gruppo abbinato — premi prima "Abbina foto e file".'); return; }
 
   const btn = document.getElementById('avviaBtn');
@@ -527,8 +527,8 @@ document.getElementById('avviaBtn').addEventListener('click', async () => {
     const xls = fileXlsPerGruppo[numero];
     const statusEl = addProgressItem(xls.nomeGruppo);
     try {
-      const problemi = await verificaGruppo(apiKey, numero, (attempt, status) => {
-        statusEl.textContent = status === 404 ? '🔁 modello aggiornato, ritento...' : `🔄 server occupato, ritento (${attempt}/4)...`;
+      const problemi = await verificaGruppo(numero, (attempt, status) => {
+        statusEl.textContent = status === 404 ? '🔁 modello aggiornato, ritento...' : status === 'chiave' ? '🔑 chiave esaurita, passo alla successiva...' : `🔄 server occupato, ritento (${attempt}/4)...`;
       });
       statoVerifica[numero] = { stato: 'done', problemi, errore: null };
       statusEl.textContent = problemi.length ? `⚠️ ${problemi.length} differenza/e trovate` : '✅ tutto ok';
